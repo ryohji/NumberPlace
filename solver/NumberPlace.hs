@@ -45,8 +45,7 @@ box b n = let (q,r) = divMod (n-1) 3
      in concatMap (take 3.drop (r*3).row b) [x+q*3|x<-[1..3]]
 
 valid' :: String -> Bool
-valid' s = let s' = filter (`elem` "123456789") s
-      in length s' == length (nub s')
+valid' = null.(\\ "123456789").filter (`elem` "123456789")
 
 valid :: Board -> Bool
 valid b = all valid'.concat.map (flip map [1..9].($ b)) $ [box, row, col]
