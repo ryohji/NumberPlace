@@ -50,21 +50,20 @@ valid' = null.(\\ "123456789").filter (`elem` "123456789")
 valid :: Board -> Bool
 valid b = all valid'.concat.map (flip map [1..9].($ b)) $ [box, row, col]
 
-findSp :: Board -> Maybe (Int, Int)
-findSp b = let i = findIndex (==' ') (concat b)  in case i of
-  Nothing -> Nothing
-  Just i -> let (r,c) = divMod i 9 in Just (r+1, c+1)
+noSpace :: Board -> Bool
+noSpace = (==Nothing).(find (==' ')).concat
 
 nexts :: Board -> [Board]
-nexts b = let pos = findSp b
-  in case pos of
-    Nothing -> []
-    Just (r, c) -> let (bh, bt) = splitAt (r-1) b
-                       (rh, rt) = splitAt (c-1) (row b r)
-                       rows = map (\c -> rh ++ c:tail rt) "123456789"
-                   in map (\r -> bh ++ r:tail bt) rows
+nexts b = let cs = concat b; p = findIndex (==' ') cs  in case p of
+  Nothing -> []
+  Just n  -> let (h, t) = splitAt n cs
+    in [slice 9 (h ++ c:tail t) | c <- "123456789"]
+
+slice :: Int -> [a] -> [[a]]
+slice n = let f xs = if null xs then mzero else (return.splitAt n) xs
+  in unfoldr f
 
 solve :: (MonadPlus m) => Board -> m Board
 solve b
-      |findSp b == Nothing = if valid b then return b else mzero
+      |noSpace b = if valid b then return b else mzero
       |otherwise = msum [solve b' |b' <- nexts b, valid b']
