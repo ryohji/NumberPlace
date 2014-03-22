@@ -51,10 +51,9 @@ valid :: Board -> Bool
 valid b = all valid'.concat.map (flip map [1..9].($ b)) $ [box, row, col]
 
 findSp :: Board -> Maybe (Int, Int)
-findSp b = let rs = map (findIndex (==' ')) b; rIdx = findIndex (/=Nothing) rs
-       in case rIdx of
-         Nothing -> Nothing
-         Just r -> Just (1+r, 1+fromJust (rs!!r))
+findSp b = let i = findIndex (==' ') (concat b)  in case i of
+  Nothing -> Nothing
+  Just i -> let (r,c) = divMod i 9 in Just (r+1, c+1)
 
 nexts :: Board -> [Board]
 nexts b = let pos = findSp b
